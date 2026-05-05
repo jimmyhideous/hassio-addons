@@ -4,10 +4,39 @@ name: Repository Updater
 # yamllint disable-line rule:truthy
 on:
   repository_dispatch:
-    types: ["update"]
+    types:
+      - update
+
+permissions: {}
 
 jobs:
-  workflows:
-    uses: erik73/workflows/.github/workflows/repository-updater.yaml@main
-    secrets:
-      UPDATER_TOKEN: ${{ secrets.UPDATER_TOKEN }}
+  update:
+    name: Update add-on versions
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Update influxdb3-explorer version
+        run: |
+          VERSION="${{ github.event.client_payload.version }}"
+          if [ -z "$VERSION" ] || [ "$VERSION" = "dev" ]; then
+            echo "Version '${VERSION}' is not a release version, skipping"
+            exit 0
+          fi
+          sed -i "s/^version:.*/version: ${VERSION}/" influxdb3-explorer/config.yaml
+          echo "Updated influxdb3-explorer to ${VERSION}"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git add influxdb3-explorer/config.yaml
+          git commit -m "Update influxdb3-explorer to ${{ github.event.client_payload.version }}"
+          git push

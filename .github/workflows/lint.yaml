@@ -11,6 +11,15 @@ on:
       - synchronize
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  workflows:
-    uses: erik73/workflows/.github/workflows/repository-lint.yaml@main
+  yamllint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code from GitHub
+        uses: actions/checkout@v4.2.2
+      - name: Run yamllint
+        uses: frenck/action-yamllint@v1.5.0
