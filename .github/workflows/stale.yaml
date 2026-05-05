@@ -7,6 +7,22 @@ on:
     - cron: "0 8 * * *"
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
-  workflows:
-    uses: hassio-addons/workflows/.github/workflows/stale.yaml@main
+  stale:
+    name: Mark stale issues and PRs
+    permissions:
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark stale issues and PRs
+        uses: actions/stale@v9.0.0
+        with:
+          days-before-stale: 60
+          days-before-close: 7
+          stale-issue-label: stale
+          stale-pr-label: stale
+          stale-issue-message: Marked as stale due to inactivity. Will close in 7 days without activity.
+          stale-pr-message: Marked as stale due to inactivity. Will close in 7 days without activity.
