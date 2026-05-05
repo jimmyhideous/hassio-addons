@@ -7,6 +7,18 @@ on:
     - cron: "0 9 * * *"
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
-  workflows:
-    uses: erik73/workflows/.github/workflows/lock.yaml@main
+  lock:
+    name: Lock closed threads
+    permissions:
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lock closed issues and PRs
+        uses: dessant/lock-threads@v4.0.1
+        with:
+          issue-inactive-days: 30
+          pr-inactive-days: 30
